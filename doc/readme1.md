@@ -371,7 +371,7 @@ mov ax, [bx][si].200
 * 处理的数据在什么地方？
 * 要处理的数据有多长？
 
-寄存器reg：ax、bx、cx、dx、ah、al、bh、bl、ch、cl、dh、dl、sp、bp、si、di
+寄存器reg：ax、bx、cx、dx、ah、al、bh、bl、ch、cl、dh、dl、sp、**bp**、si、di
 
 段寄存器sreg：ds、ss、cs、es
 

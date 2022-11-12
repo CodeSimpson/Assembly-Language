@@ -15,32 +15,32 @@ stack ends
 
 codesg segment
  start:
-   mov ax, datasg
-   mov ds, ax
-   mov di, 0
+	mov ax, datasg
+	mov ds, ax
+	mov di, 0
 
-   mov ax, stack
-   mov ss, ax
-   mov sp, 20
+	mov ax, stack
+	mov ss, ax
+	mov sp, 20
 
-   mov ax, strtable
-   mov es, ax
-   mov si, 0
+	mov ax, strtable
+	mov es, ax
+	mov si, 0
 
-   mov ax, ds:[di]   ; 低位内存地址存放数据低位
-   mov dx, ds:[di+2]
-   call dwtoc
+	mov ax, ds:[di]   ; 低位内存地址存放数据低位
+	mov dx, ds:[di+2]
+	call dwtoc
 
 	mov dh, 8
 	mov dl, 3
 	mov cl, 2
-   mov ax, strtable
-   mov ds, ax
-   mov si, 0
+	mov ax, strtable
+	mov ds, ax
+	mov si, 0
 	call show_str
 
-   mov ax, 4c00h
-   int 21h
+	mov ax, 4c00h
+	int 21h
 
 ; 名称：dwtoc
 ; 功能：将dword型数转变为表示十进制数的字符串，字符串以0为结尾符
