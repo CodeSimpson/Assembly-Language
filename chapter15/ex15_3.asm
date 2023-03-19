@@ -30,6 +30,7 @@ code segment
     push es:[9*4+2]
     pop es:[202h]
 
+   ; 更新中断向量表
     cli
     mov word ptr es:[9*4], 204h
     mov word ptr es:[9*4+2], 0

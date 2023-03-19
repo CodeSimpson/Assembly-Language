@@ -97,12 +97,14 @@ code segment
 
     in al, 60h          ; 读出60h端口的扫描码
     ; 调用bios中的int 9中断
-    pushf
-    pushf
+    pushf               ; 标志寄存器入栈
+
+    pushf               ; IF = 0, TF = 0，进入BIOS的int 9中断例程后会自动设置，这段可以省略
     pop bx
     and bh, 11111100b
     push bx
-    popf                ; IF = 0, TF = 0，进入BIOS的int 9中断例程后会自动设置，这段可以省略
+    popf                
+
     call dword ptr ds:[0]   ; 对int指令进行模拟，调用原来的int 9中断例程
 
     cmp al, 1           ; esc键的扫描码

@@ -25,7 +25,8 @@ code segment
     mov word ptr es:[7ch*4], 200H       ;
     mov word ptr es:[7ch*4+2], cx      ; 设置中断向量表的入口地址
 
-    mov ah, 0
+    mov ah, 3
+    mov al, 2
     int 7ch              ; 触发中断
 
     mov ax, 4c00h
@@ -56,59 +57,122 @@ code segment
     pop ax
     iret
 
+; 清屏
  sub1:
     push ax
+    push bx
     push es
 
     mov ax, 0b800h
     mov es, ax
-    mov al, '1'
-    mov ah, 2
-    mov es:[160*12+40*2], ax
-    
-    pop es
-    pop ax
-    ret                                     ; 这里不能简单通过jmp short int7ret返回中断例程，因为call指令调用后，执行了push ip操作，
-                                            ; 而int指令之前也执行了push CS和IP操作，此时直接调用iret，此时占顶存在两个不同的IP值，执行iret后得到的CS和IP是错误的
+    mov al, ' '
+    mov bx, 0
+    mov cx, 2000
+ s1:
+    mov es:[bx], al
+    add bx, 2
+    loop s1
 
+    pop es
+    pop bx
+    pop ax
+    ret                 ; 这里不能简单通过jmp short int7ret返回中断例程，因为call指令调用后，执行了push ip操作，
+                        ; 而int指令之前也执行了push CS和IP操作，此时直接调用iret，此时占顶存在两个不同的IP值，执行iret后得到的CS和IP是错误的
+
+; 设置前景色，al传递颜色
  sub2:
     push ax
+    push bx
     push es
 
-    mov ax, 0b800h
-    mov es, ax
-    mov al, '2'
-    mov ah, 2
-    mov es:[160*12+40*2], ax
+    mov bx, 0b800h
+    mov es, bx
+    mov bx, 1
+    mov cx, 2000
+ s2:
+    and byte ptr es:[bx], 11111000b
+    or es:[bx], al
+    add bx, 2
+    loop s2
     
     pop es
+    pop bx
     pop ax
     ret
 
+; 设置背景色，al传递颜色
  sub3:
     push ax
+    push bx
     push es
 
-    mov ax, 0b800h
-    mov es, ax
-    mov al, '3'
-    mov ah, 2
-    mov es:[160*12+40*2], ax
+    mov cl, 4
+    shl al, cl                  ; al左移四位
+
+    mov bx, 0b800h
+    mov es, bx
+    mov bx, 1
+    mov cx, 2000
+ s3:
+    and byte ptr es:[bx], 10001111b
+    or es:[bx], al
+    add bx, 2
+    loop s3
     
     pop es
+    pop bx
     pop ax
     ret
 
+; 向上滚动一行
  sub4:
     push ax
     push es
+    push dx
+    push cx
+    push bx
 
     mov ax, 0b800h
     mov es, ax
-    mov al, '4'
-    mov ah, 2
-    mov es:[160*12+40*2], ax
-    
+    mov dh, 0   ;   dh保存行数，dl保存列数
+    mov dl, 0
+    mov cx, 24
+ s4:
+    push cx
+    add dh, 1
+    mov dl, 0
+ s5:
+    mov al, dh
+    mov ch, 160
+    mul ch
+    mov bx, ax
+
+    mov al, dl
+    mov ch, 2
+    mul ch
+    add bx, ax
+
+    mov ax, es:[bx]
+    sub bx, 160
+    mov es:[bx], ax
+
+    add dl, 1
+    cmp dl, 80
+    jna s5
+
+    pop cx
+    loop s4
+
+    mov cx, 80
+    mov bx, 0
+ s6:
+    mov byte ptr es:[160*24+bx], ' '        ; 清空最后一行
+    add bx, 2
+    loop s6
+
+    pop bx
+    pop cx
+    pop dx
     pop es
     pop ax
     ret
